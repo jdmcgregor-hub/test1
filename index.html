@@ -1,3 +1,428 @@
-<html>
-<center>Words go here</center>
-  </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirate Multiplication Challenge</title>
+    <style>
+        body {
+            font-family: 'Trebuchet MS', sans-serif;
+            background-color: #1a3f5c;
+            color: #f1d68c;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: url('/api/placeholder/800/400');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #f1d68c;
+            text-shadow: 2px 2px 4px #000;
+            font-size: 2.5rem;
+        }
+        
+        .treasure-map {
+            background-color: rgba(96, 57, 19, 0.85);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border: 3px solid #8b4513;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .pirate-button {
+            background-color: #c93a29;
+            color: #f1d68c;
+            border: 2px solid #f1d68c;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .pirate-button:hover {
+            background-color: #a12c1e;
+            transform: scale(1.05);
+        }
+        
+        .card {
+            background-color: rgba(241, 214, 140, 0.9);
+            color: #1a3f5c;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: transform 0.3s;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        
+        .card .front {
+            transform: rotateY(0deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        
+        .card .back {
+            transform: rotateY(180deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        
+        .flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .multiplication {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .answer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #c93a29;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background-color: rgba(241, 214, 140, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .progress-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .progress-item {
+            width: 15px;
+            height: 15px;
+            background-color: #603913;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .progress-item.correct {
+            background-color: #2e8b57;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(96, 57, 19, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f1d68c;
+        }
+        
+        .pirate-message {
+            font-style: italic;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                width: 140px;
+                height: 140px;
+                padding: 10px;
+            }
+            
+            .multiplication {
+                font-size: 1.5rem;
+            }
+            
+            .answer {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pirate's Multiplication Treasure</h1>
+        
+        <div class="treasure-map">
+            <p>Ahoy Matey! Help Captain Numberbeard find the multiplication treasure by solving these problems. Flip the cards to reveal the answers!</p>
+            
+            <div class="controls">
+                <button id="generate-btn" class="pirate-button">New Treasure Map</button>
+                <button id="show-all-btn" class="pirate-button">Reveal All Treasure</button>
+                <button id="hide-all-btn" class="pirate-button">Hide All Treasure</button>
+            </div>
+            
+            <div class="card-container" id="card-container">
+                <!-- Cards will be generated here -->
+            </div>
+            
+            <div class="progress">
+                <h3>Treasure Map Progress</h3>
+                <div class="progress-bar" id="progress-bar">
+                    <!-- Progress indicators will be generated here -->
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div>Correct Treasures</div>
+                    <div class="stat-value" id="correct-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Total Problems</div>
+                    <div class="stat-value" id="total-count">0</div>
+                </div>
+            </div>
+            
+            <div class="pirate-message" id="pirate-message">
+                "Start yer journey to multiplication mastery, ye scallywag!"
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let cards = [];
+        let correctCount = 0;
+        let totalCount = 0;
+        const piratePhrases = [
+            "Shiver me timbers! Ye be getting better at these sums!",
+            "Yo ho ho! That's the way to multiply, matey!",
+            "Blimey! Ye've got the treasure map all figured out!",
+            "Avast ye! Keep practicing and ye'll be a multiplication pirate in no time!",
+            "By Blackbeard's beard! Ye're multiplying like a true pirate!",
+            "Arr! Ye be making Captain Numberbeard proud!",
+            "Splice the mainbrace! Ye're doing great with these numbers!",
+            "Walk the plank if ye can't multiply, but ye're doing just fine!",
+            "Swab the deck and multiply these numbers, that's the spirit!"
+        ];
+        
+        // Function to create a multiplication card
+        function createCard(a, b) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.a = a;
+            card.dataset.b = b;
+            card.dataset.answer = a * b;
+            
+            // Create front of card (question)
+            const front = document.createElement('div');
+            front.className = 'card-content front';
+            front.innerHTML = `
+                <div class="multiplication">${a} × ${b}</div>
+                <div style="font-size: 0.8rem; margin-top: 10px;">Click to reveal treasure!</div>
+            `;
+            
+            // Create back of card (answer)
+            const back = document.createElement('div');
+            back.className = 'card-content back';
+            back.innerHTML = `
+                <div class="multiplication">${a} × ${b} =</div>
+                <div class="answer">${a * b}</div>
+            `;
+            
+            card.appendChild(front);
+            card.appendChild(back);
+            
+            // Add click event to flip the card
+            card.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+                
+                // Update progress if it's the first time flipping this card
+                if (this.classList.contains('flipped') && !this.dataset.counted) {
+                    this.dataset.counted = 'true';
+                    correctCount++;
+                    updateStats();
+                }
+            });
+            
+            return card;
+        }
+        
+        // Function to generate random multiplication problems
+        function generateProblems() {
+            // Reset counts
+            correctCount = 0;
+            totalCount = 0;
+            
+            // Clear existing cards
+            const cardContainer = document.getElementById('card-container');
+            cardContainer.innerHTML = '';
+            
+            // Create array of all possible combinations for 6-12 multiplication
+            let problems = [];
+            for (let i = 6; i <= 12; i++) {
+                for (let j = 6; j <= 12; j++) {
+                    problems.push([i, j]);
+                }
+            }
+            
+            // Shuffle array using Fisher-Yates algorithm
+            for (let i = problems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [problems[i], problems[j]] = [problems[j], problems[i]];
+            }
+            
+            // Take first 12 problems (or fewer if you want)
+            const selectedProblems = problems.slice(0, 12);
+            totalCount = selectedProblems.length;
+            
+            // Create cards for each problem
+            cards = [];
+            selectedProblems.forEach(([a, b]) => {
+                const card = createCard(a, b);
+                cardContainer.appendChild(card);
+                cards.push(card);
+            });
+            
+            // Update progress bar
+            updateProgressBar();
+            
+            // Update stats
+            updateStats();
+            
+            // Update pirate message
+            updatePirateMessage();
+        }
+        
+        // Function to update progress bar
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.innerHTML = '';
+            
+            for (let i = 0; i < totalCount; i++) {
+                const progressItem = document.createElement('div');
+                progressItem.className = 'progress-item';
+                progressBar.appendChild(progressItem);
+            }
+        }
+        
+        // Function to update stats
+        function updateStats() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = totalCount;
+            
+            // Update progress bar
+            const progressItems = document.querySelectorAll('.progress-item');
+            for (let i = 0; i < correctCount && i < progressItems.length; i++) {
+                progressItems[i].classList.add('correct');
+            }
+            
+            // Update pirate message based on progress
+            updatePirateMessage();
+        }
+        
+        // Function to update pirate message
+        function updatePirateMessage() {
+            const messageElement = document.getElementById('pirate-message');
+            
+            if (correctCount === 0) {
+                messageElement.textContent = '"Start yer journey to multiplication mastery, ye scallywag!"';
+            } else if (correctCount === totalCount) {
+                messageElement.textContent = '"Arr! Ye found all the treasure! Ye be a true multiplication pirate now!"';
+            } else {
+                const randomIndex = Math.floor(Math.random() * piratePhrases.length);
+                messageElement.textContent = `"${piratePhrases[randomIndex]}"`;
+            }
+        }
+        
+        // Function to show all answers
+        function showAllAnswers() {
+            cards.forEach(card => {
+                if (!card.classList.contains('flipped')) {
+                    card.classList.add('flipped');
+                    
+                    // Count it if it hasn't been counted before
+                    if (!card.dataset.counted) {
+                        card.dataset.counted = 'true';
+                        correctCount++;
+                    }
+                }
+            });
+            
+            updateStats();
+        }
+        
+        // Function to hide all answers
+        function hideAllAnswers() {
+            cards.forEach(card => {
+                card.classList.remove('flipped');
+            });
+        }
+        
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up button event listeners
+            document.getElementById('generate-btn').addEventListener('click', generateProblems);
+            document.getElementById('show-all-btn').addEventListener('click', showAllAnswers);
+            document.getElementById('hide-all-btn').addEventListener('click', hideAllAnswers);
+            
+            // Generate initial problems
+            generateProblems();
+        });
+    </script>
+</body>
+</html>
